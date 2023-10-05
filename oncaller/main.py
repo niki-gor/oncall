@@ -1,8 +1,9 @@
 import argparse
 import asyncio
+
 from oncaller import api_requests
-from oncaller.parser import parse_teams_schedule_file
 from oncaller.config import Config
+from oncaller.parser import parse_teams_schedule_file
 
 
 def main():

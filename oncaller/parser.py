@@ -1,5 +1,6 @@
-from oncaller.models import Teams
 import yaml
+
+from oncaller.models import Teams
 
 
 def parse_teams_schedule_file(filename: str) -> Teams:

@@ -1,7 +1,14 @@
 import asyncio
-import httpx
-from oncaller.models import Team
+import logging
 from datetime import timedelta
+
+import httpx
+
+from oncaller.models import Team
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
 
 
 def send_many(f):
@@ -9,9 +16,11 @@ def send_many(f):
         coroutines = []
         for team in teams:
             coroutines.extend(f(client, team))
-        result = await asyncio.gather(*coroutines)
-        for response in result:
-            print(response.status_code, response.content)
+        responses = await asyncio.gather(*coroutines)
+        for response in responses:
+            logger.info(
+                f"{response.request.url} {response.status_code} {response.content}"
+            )
 
     return wrapper
 
