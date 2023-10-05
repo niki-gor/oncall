@@ -1,3 +1,18 @@
+## Как запустить oncall
+`docker compose up`
+
+## Как установить расписание
+1. Написать конфиг расписаний
+   - По умолчанию конфиг находится в configs/schedule.yml
+1. `poetry install`
+1. `poetry run oncaller schedule/config/path.yml`
+   - Без последнего аргумента используется конфиг по умолчанию
+
+
+---
+
+
+
 Oncall [![Gitter chat](https://badges.gitter.im/irisoncall/Lobby.png)](https://gitter.im/irisoncall/Lobby) [![Build Status](https://circleci.com/gh/linkedin/oncall.svg?style=shield)](https://circleci.com/gh/linkedin/oncall)
 ======
 
