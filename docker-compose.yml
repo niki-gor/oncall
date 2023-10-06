@@ -23,6 +23,14 @@ services:
     networks:
       - iris
 
+  prometheus:
+    image: prom/prometheus:v2.47.1
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - /var/run/docker.sock:/host/var/run/docker.sock
+    ports:
+      - 9090:9090
+
 networks:
   iris:
     name: iris
