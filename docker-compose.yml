@@ -30,6 +30,8 @@ services:
       - /var/run/docker.sock:/host/var/run/docker.sock
     ports:
       - 9090:9090
+    networks:
+      - iris
 
 networks:
   iris:
