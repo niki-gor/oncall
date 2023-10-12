@@ -33,6 +33,25 @@ services:
     networks:
       - iris
 
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    expose:
+      - "9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^(sys|proc|dev|host|etc)($$|/)'
+      - '--no-collector.btrfs'
+      - '--no-collector.zfs'
+      - '--no-collector.entropy'
+    networks:
+      - iris
+
 networks:
   iris:
     name: iris
