@@ -39,6 +39,7 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - ./textfile:/etc/textfile
     expose:
       - "9100"
     command:
@@ -46,11 +47,20 @@ services:
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^(sys|proc|dev|host|etc)($$|/)'
-      - '--no-collector.btrfs'
+      - '--no-collector.mdadm'
+      - '--no-collector.nfs'
+      - '--no-collector.nfsd'
+      - '--no-collector.xfs'
       - '--no-collector.zfs'
-      - '--no-collector.entropy'
+      - '--collector.textfile.directory=/etc/textfile'
     networks:
       - iris
+    healthcheck:
+      test: sed -E -i "s/[0-9]+/$$RANDOM/" /etc/textfile/random.prom
+      interval: 3s
+      timeout: 1s
+      retries: 1
+      start_period: 5s
 
 networks:
   iris:
