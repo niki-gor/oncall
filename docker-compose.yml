@@ -6,6 +6,7 @@ services:
     hostname: oncall
     ports:
       - "8080:8080"
+      - "9091:9091"
     environment:
       - DOCKER_DB_BOOTSTRAP=1
       - IRIS_API_HOST=iris
@@ -19,6 +20,26 @@ services:
     image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=1234
+    networks:
+      - iris
+
+  prometheus:
+    image: prom/prometheus:v2.47.1
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - /var/run/docker.sock:/host/var/run/docker.sock
+    ports:
+      - 9090:9090
+    networks:
+      - iris
+  
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.24.0
+    volumes:
+      - ./blackbox.yml:/etc/blackbox_exporter/config.yml
+      - /var/run/docker.sock:/host/var/run/docker.sock
+    ports:
+      - "9115:9115"
     networks:
       - iris
 
