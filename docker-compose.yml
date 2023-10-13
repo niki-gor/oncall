@@ -32,6 +32,16 @@ services:
       - 9090:9090
     networks:
       - iris
+  
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.24.0
+    volumes:
+      - ./blackbox.yml:/etc/blackbox_exporter/config.yml
+      - /var/run/docker.sock:/host/var/run/docker.sock
+    ports:
+      - "9115:9115"
+    networks:
+      - iris
 
 networks:
   iris:
