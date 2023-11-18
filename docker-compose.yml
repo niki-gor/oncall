@@ -13,6 +13,7 @@ services:
       - IRIS_API_HOST=iris
     volumes:
       - ./configs/config.docker.yaml:/home/oncall/config/config.yaml
+      - logs:/home/oncall/var/log
     networks:
       - iris
   
@@ -24,45 +25,44 @@ services:
     networks:
       - iris
 
-  prometheus:
-    image: prom/prometheus:v2.47.1
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - /var/run/docker.sock:/host/var/run/docker.sock
-    ports:
-      - 9090:9090
+  elasticsearch:
+    image: elastic/elasticsearch:8.10.2
+    environment:
+      - discovery.type=single-node
     networks:
       - iris
 
-  node-exporter:
-    image: prom/node-exporter:v1.6.1
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-      - ./textfile:/etc/textfile
-    expose:
-      - "9100"
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^(sys|proc|dev|host|etc)($$|/)'
-      - '--no-collector.mdadm'
-      - '--no-collector.nfs'
-      - '--no-collector.nfsd'
-      - '--no-collector.xfs'
-      - '--no-collector.zfs'
-      - '--collector.textfile.directory=/etc/textfile'
+  kibana:
+    image: elastic/kibana:8.10.2
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
     networks:
       - iris
-    healthcheck:
-      test: sed -E -i "s/[0-9]+/$$RANDOM/" /etc/textfile/random.prom
-      interval: 3s
-      timeout: 1s
-      retries: 1
-      start_period: 5s
+
+  logstash:
+    image: elastic/logstash:8.10.2
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+    networks:
+      - iris
+
+  filebeat:
+    image: elastic/filebeat:8.10.2
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - logs:/var/log
+    depends_on:
+      - logstash
+    networks:
+      - iris
 
 networks:
   iris:
     name: iris
+
+volumes:
+  logs:
