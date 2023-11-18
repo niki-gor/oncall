@@ -13,6 +13,7 @@ services:
       - IRIS_API_HOST=iris
     volumes:
       - ./configs/config.docker.yaml:/home/oncall/config/config.yaml
+      - logs:/home/oncall/var/log
     networks:
       - iris
   
@@ -24,6 +25,7 @@ services:
     networks:
       - iris
 
+<<<<<<< Updated upstream
   prometheus:
     image: prom/prometheus:v2.47.1
     volumes:
@@ -62,7 +64,46 @@ services:
       timeout: 1s
       retries: 1
       start_period: 5s
+=======
+  elasticsearch:
+    image: elastic/elasticsearch:8.10.2
+    environment:
+      - discovery.type=single-node
+    networks:
+      - iris
+
+  kibana:
+    image: elastic/kibana:8.10.2
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    networks:
+      - iris
+
+  logstash:
+    image: elastic/logstash:8.10.2
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+    networks:
+      - iris
+
+  filebeat:
+    image: elastic/filebeat:8.10.2
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - logs:/var/log
+    depends_on:
+      - logstash
+    networks:
+      - iris
+>>>>>>> Stashed changes
 
 networks:
   iris:
     name: iris
+
+volumes:
+  logs:
