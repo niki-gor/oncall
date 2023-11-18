@@ -38,7 +38,6 @@ setuptools.setup(
         'PyYAML',
         'PyMYSQL',
         'phonenumbers',
-        'prometheus_client',
         'jinja2==3.0.3',
         'webassets',
         'beaker',
