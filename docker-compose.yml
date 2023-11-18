@@ -1,16 +1,19 @@
 version: '3'
 
+
 services:
   oncall-web:
     build: .
     hostname: oncall
     ports:
       - "8080:8080"
+      - "9091:9091"
     environment:
       - DOCKER_DB_BOOTSTRAP=1
       - IRIS_API_HOST=iris
     volumes:
       - ./configs/config.docker.yaml:/home/oncall/config/config.yaml
+      - logs:/home/oncall/var/log
     networks:
       - iris
   
@@ -22,6 +25,44 @@ services:
     networks:
       - iris
 
+  elasticsearch:
+    image: elastic/elasticsearch:8.10.2
+    environment:
+      - discovery.type=single-node
+    networks:
+      - iris
+
+  kibana:
+    image: elastic/kibana:8.10.2
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    networks:
+      - iris
+
+  logstash:
+    image: elastic/logstash:8.10.2
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+    networks:
+      - iris
+
+  filebeat:
+    image: elastic/filebeat:8.10.2
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - logs:/var/log
+    depends_on:
+      - logstash
+    networks:
+      - iris
+
 networks:
   iris:
     name: iris
+
+volumes:
+  logs:
