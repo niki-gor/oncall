@@ -1,0 +1,38 @@
+---
+- name: Start Oncall Docker Services
+  hosts: oncall
+  become: yes
+  vars:
+    ports:
+    - 8081
+    - 8082
+    - 8083
+
+  tasks:
+    - name: Build Oncall Docker image
+      docker_image:
+        name: oncall-web
+        source: build
+        build:
+          path: "."
+
+    - name: Ensure network exists
+      docker_network:
+        name: iris
+        state: present
+    
+    - name: Start Oncall MySQL container
+      docker_container:
+        name: oncall-mysql
+        image: "mysql:5.7"
+        hostname: oncall-mysql
+        env:
+          MYSQL_ROOT_PASSWORD: "1234"
+        networks:
+          - name: iris
+
+    - name: Restart containers one by one
+      include_tasks: rolling-deploy-instance.yml
+      loop: "{{ ports }}"
+      loop_control:
+        extended: true
