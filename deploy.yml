@@ -32,7 +32,19 @@
           - name: iris
 
     - name: Restart containers one by one
-      include_tasks: rolling-deploy-instance.yml
+      include_tasks: tasks.yml
       loop: "{{ ports }}"
       loop_control:
         extended: true
+
+    - name: Generate NGINX config
+      template:
+        src: nginx.conf.j2
+        dest: "/etc/nginx/nginx.conf"
+      vars:
+        deploy_all: true
+
+    - name: Restart NGINX for the new configuration to take effect
+      service:
+        name: nginx
+        state: reloaded

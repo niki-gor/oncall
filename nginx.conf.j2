@@ -1,0 +1,17 @@
+events {
+}
+
+http {
+    upstream oncall {
+{% for port in ports %}{% if deploy_all == True or port != item %}
+        server 127.0.0.1:{{ port }};
+{% endif %}{% endfor %}
+    }
+
+    server {
+        listen 8080;
+        location / {
+            proxy_pass http://oncall;
+        }
+    }
+}
