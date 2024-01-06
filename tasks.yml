@@ -1,0 +1,25 @@
+---
+- name: Generate NGINX config
+  template:
+    src: nginx.conf.j2
+    dest: "/etc/nginx/nginx.conf"
+  vars:
+    deploy_all: false
+- name: Restart NGINX for the new configuration to take effect
+  service:
+    name: nginx
+    state: reloaded
+- name: Start Oncall web containers
+  docker_container:
+    name: "oncall-web-{{ ansible_loop.index }}"
+    image: oncall-web
+    published_ports:
+      - "{{ item }}:8080"
+    env:
+      DOCKER_DB_BOOTSTRAP: "1"
+      IRIS_API_HOST: "iris"
+    volumes:
+      - "./configs/config.docker.yaml:/home/oncall/config/config.yaml"
+    networks:
+      - name: iris
+    recreate: true
