@@ -7,7 +7,7 @@ from ujson import dumps as json_dumps
 
 from ...auth import login_required, check_team_auth
 from .users import get_user_data
-from ... import db
+from ... import db, metrics
 from ...utils import load_json_body, subscribe_notifications, create_audit
 from ...constants import ROSTER_USER_ADDED
 
@@ -153,6 +153,7 @@ def on_post(req, resp, team, roster):
         create_audit({'roster': roster, 'user': user_name, 'request_body': data}, team,
                      ROSTER_USER_ADDED, req, cursor)
         connection.commit()
+        metrics.stats['roster_users_cnt'] += 1
     except db.IntegrityError:
         raise HTTPError('422 Unprocessable Entity',
                         'IntegrityError',

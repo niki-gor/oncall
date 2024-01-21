@@ -6,7 +6,7 @@ from falcon import HTTPNotFound, HTTPBadRequest, HTTP_200
 
 from ...auth import login_required, check_team_auth
 from ...utils import load_json_body, unsubscribe_notifications, create_audit
-from ... import db
+from ... import db, metrics
 from ...constants import ROSTER_USER_DELETED, ROSTER_USER_EDITED
 
 
@@ -76,6 +76,7 @@ def on_delete(req, resp, team, roster, user):
     connection.close()
     resp.status = HTTP_200
     resp.body = '[]'
+    metrics.stats['roster_users_cnt'] -= 1
 
 
 @login_required

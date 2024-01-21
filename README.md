@@ -1,55 +1,21 @@
-Oncall [![Gitter chat](https://badges.gitter.im/irisoncall/Lobby.png)](https://gitter.im/irisoncall/Lobby) [![Build Status](https://circleci.com/gh/linkedin/oncall.svg?style=shield)](https://circleci.com/gh/linkedin/oncall)
-======
+## Контекст, для которого будем готовить метрики
+Начальство требует, чтобы для мониторинга всегда был назначен как минимум один ответственный
 
-<p align="center"><img src="https://github.com/linkedin/oncall/raw/master/docs/source/_static/demo.png" width="600"></p>
+## Проектирование exporter
+В код была добавлена такая метрика roster_users_cnt, которая отвечает за кол-во пользователей (==дежурных) в списке.
 
-See [admin docs](http://oncall.tools/docs/admin_guide.html) for information on
-how to run and manage Oncall.
+Переменная увеличивается/уменьшается при добавлении/удалении пользователя из ростера.
 
-Development setup
------------------
-### Prerequisites
+---
+Также я планировал добавить метрику api_response_lapse, но подключить метрику к мне так и не удалось
+- все метрики oncall экспортируются из приложения notifier
+  - входная точка src/oncall/bin/notifier.py
+- ручки на rosters API (/api/v0/teams/{team}/rosters/{roster}/users) находятся в приложении api, которое не экспортирует метрики
+- возникли сложности с тем, чтобы внедрить метрики в api 
+  - кодовая база достаточно сложна, и времени на ресерч у меня не было
 
-  * Debian/Ubuntu - `sudo apt-get install libsasl2-dev python3-dev libldap2-dev libssl-dev python-pip python-setuptools mysql-server mysql-client`
+Насколько мне известно, SRE не обязан разбираться в кодовой базе так же хорошо, как и разработчики, ввиду разделения обязанностей.
 
-### Install
-
-```bash
-python setup.py develop
-pip install -e '.[dev]'
-```
-
-Setup mysql schema:
-
-```bash
-mysql -u root -p < ./db/schema.v0.sql
-```
-
-Setup app config by editing configs/config.yaml.
-
-Optionally, you can import dummy data for testing:
-
-```bash
-mysql -u root -p -o oncall < ./db/dummy_data.sql
-```
-
-### Run
-
-One of the following commands:
-
-* `goreman start`
-* `procman start`
-* `make serve`
-* `oncall-dev ./configs/config.yaml`
-
-
-### Test
-
-```bash
-make test
-```
-
-Check out https://github.com/linkedin/oncall/issues for a list of outstanding
-issues, and tackle any one that catches your interest. Contributions are
-expected to be tested thoroughly and submitted with unit/end-to-end tests; look
-in the e2e directory for our suite of end-to-end tests.
+Как SRE, чтобы внедрить новую метрику api_response_time в приложение, я бы поступил следующим образом
+- Собрал бы встречу разработчиков и рассказал бы контекст
+- Попросил бы их добавить эту метрику/попросил бы объяснить как это сделать
